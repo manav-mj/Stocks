@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements StockAsyncTask.St
 
     Boolean checkFlag = false;
 
+    Animation fabOpen, fabClose;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements StockAsyncTask.St
 
         stockProgress = new ProgressDialog(this);
         symbolProgress = new ProgressDialog(this);
+
+        fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
 
         stockProgress.setCancelable(false);
         symbolProgress.setCancelable(false);
@@ -87,9 +94,23 @@ public class MainActivity extends AppCompatActivity implements StockAsyncTask.St
         stockListView.setAdapter(arrayAdapter);
         stockListView.setDivider(null);
 
-
+        final FloatingActionButton fabCancel = (FloatingActionButton) findViewById(R.id.fab_cancel);
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(fabAddListener);
+        fabCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fabCancel.startAnimation(fabClose);
+                arrayAdapter.notifyDataSetChanged();
+                fab.setImageResource(R.drawable.ic_add_black_48dp);
+                fab.setOnClickListener(fabAddListener);
+                checkFlag = false;
+                for (Stock s :
+                        stocksList) {
+                    s.setChecked(false);
+                }
+            }
+        });
 
         SharedPreferences sp = getSharedPreferences("STOCKS", MODE_PRIVATE);
         editor = sp.edit();
@@ -117,8 +138,8 @@ public class MainActivity extends AppCompatActivity implements StockAsyncTask.St
                 checkFlag = true;
 
                 stocksList.get(position).setChecked(true);
-                Log.e("manav",position + " : " + stocksList.get(position).isChecked);
                 fab.setImageResource(R.drawable.ic_delete_black_48dp);
+                fabCancel.startAnimation(fabOpen);
                 RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.card_item_layout);
                 layout.setBackgroundColor(Color.LTGRAY);
                 View.OnClickListener fabDeleteListener = new View.OnClickListener() {
@@ -149,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements StockAsyncTask.St
                         Toast.makeText(MainActivity.this, "Stock Removed", Toast.LENGTH_SHORT).show();
                         fab.setImageResource(R.drawable.ic_add_black_48dp);
                         fab.setOnClickListener(fabAddListener);
+                        fabCancel.startAnimation(fabClose);
                         checkFlag = false;
                     }
                 };
