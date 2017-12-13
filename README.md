@@ -1,4 +1,4 @@
-# Open Event Android
+# The Stocks App
 The stocks app is an android app to get stocks information on the go.
 The app uses Yahoo finance API to fetch stock information.
 The app also uses Stock Search Api to implement a search and add functionality for stocks.
