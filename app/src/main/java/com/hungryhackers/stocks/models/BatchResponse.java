@@ -11,20 +11,32 @@ import java.util.ArrayList;
 
 public class BatchResponse {
 
+    @SerializedName("Stock Quotes")
+    @Expose
     ArrayList<BatchStockValue> qoutes;
 
-    private class BatchStockValue {
+    public class BatchStockValue {
         @SerializedName("1. symbol")
         @Expose
-        private String symbol;
+        public String symbol;
         @SerializedName("2. price")
         @Expose
-        private String price;
+        public String price;
         @SerializedName("3. volume")
         @Expose
-        private String volume;
+        public String volume;
         @SerializedName("4. timestamp")
         @Expose
-        private String timestamp;
+        public String timestamp;
+    }
+
+    public ArrayList<Stock> getStockListFromBatch(){
+        ArrayList<Stock> stocks = new ArrayList<>();
+        for (BatchStockValue batchStockValue:
+             qoutes) {
+            Stock stock = new Stock(batchStockValue.symbol, batchStockValue.price, batchStockValue.volume);
+            stocks.add(stock);
+        }
+        return stocks;
     }
 }

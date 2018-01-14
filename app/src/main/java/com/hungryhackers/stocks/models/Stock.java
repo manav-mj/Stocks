@@ -1,14 +1,14 @@
-package com.hungryhackers.stocks;
+package com.hungryhackers.stocks.models;
 
 /**
  * Created by YourFather on 12-03-2017.
  */
 
 public class Stock {
-    String name;
-    String symbol;
-    String bid;
-    String change;
+    public String name;
+    public String symbol;
+    public String bid;
+    public String change;
 
     public void setChecked(Boolean checked) {
         isChecked = checked;
