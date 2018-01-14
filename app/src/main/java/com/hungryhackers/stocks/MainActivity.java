@@ -123,22 +123,16 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sp = getSharedPreferences("STOCKS", MODE_PRIVATE);
         editor = sp.edit();
-        boolean firstLogin = sp.getBoolean(FIRSTLOGIN,true);
-        if (firstLogin){
-            stockSymbolArrayList.addAll(Arrays.asList("%22YHOO%22","%2C%22AAPL%22","%2C%22GOOG%22","%2C%22MSFT%22"));
+        boolean firstLogin = sp.getBoolean(FIRSTLOGIN, true);
+        if (firstLogin) {
+            stockSymbolArrayList.addAll(Arrays.asList("YHOO", "AAPL", "GOOG", "MSFT"));
             firstLogin = false;
             editor.putBoolean(FIRSTLOGIN, firstLogin);
             saveStocksToSharedPref();
-        }else {
+        } else {
             String stockSymbols = sp.getString(STOCKSYMBOLS, null);
             stockSymbolArrayList.clear();
             stockSymbolArrayList.addAll(Arrays.asList(stockSymbols.split(",")));
-        }
-        if (!stockSymbolArrayList.get(0).isEmpty()) {
-            for (int i = 0; i < stockSymbolArrayList.size(); i++) {
-                String[] s = stockSymbolArrayList.get(i).split("%22");
-                stockSymbolSet.add(s[1]);
-            }
         }
 
         stockListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -154,17 +148,17 @@ public class MainActivity extends AppCompatActivity {
                 View.OnClickListener fabDeleteListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        for (int pos = 0 ; pos<stocksList.size() ; pos++) {
-                            Log.i("manav",pos + " : " + stocksList.get(pos).isChecked);
+                        for (int pos = 0; pos < stocksList.size(); pos++) {
+                            Log.i("manav", pos + " : " + stocksList.get(pos).isChecked);
                             Log.e("manav", pos + "");
                             if (stocksList.get(pos).isChecked) {
                                 stockSymbolArrayList.remove(pos);
                                 stockNames.remove(pos);
                                 stocksList.remove(pos);
                                 pos--;
-                                }
-
                             }
+
+                        }
                         if (stockSymbolArrayList.size() > 0) {
                             String firstString = stockSymbolArrayList.get(0);
                             if (firstString.contains("%2C")) {
@@ -192,16 +186,16 @@ public class MainActivity extends AppCompatActivity {
         stockListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (checkFlag){
+                if (checkFlag) {
                     RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.card_item_layout);
-                    if (stocksList.get(position).isChecked){
+                    if (stocksList.get(position).isChecked) {
                         layout.setBackgroundColor(Color.WHITE);
                         stocksList.get(position).setChecked(false);
-                    }else {
+                    } else {
                         layout.setBackgroundColor(Color.LTGRAY);
                         stocksList.get(position).setChecked(true);
                     }
-                    Log.e("manav",position + " : " + stocksList.get(position).isChecked);
+                    Log.e("manav", position + " : " + stocksList.get(position).isChecked);
                 }
             }
         });
@@ -209,11 +203,13 @@ public class MainActivity extends AppCompatActivity {
         StringBuffer stockSymbols = new StringBuffer();
         for (String s : stockSymbolArrayList) {
             stockSymbols.append(s);
+            stockSymbols.append(",");
         }
+        stockSymbols.deleteCharAt(stockSymbols.length() - 1);
         fetchStockList(stockSymbols, 0);
     }
 
-    void saveStocksToSharedPref(){
+    void saveStocksToSharedPref() {
         StringBuffer stockSymbols = new StringBuffer();
         for (String s : stockSymbolArrayList) {
             stockSymbols.append(s + ",");
@@ -238,23 +234,23 @@ public class MainActivity extends AppCompatActivity {
         ApiClient.getApiInterface()
                 .getStockBatch(stockSymbols.toString())
                 .enqueue(new Callback<BatchResponse>() {
-            @Override
-            public void onResponse(Call<BatchResponse> call, Response<BatchResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.i(TAG, "Stock batch data successfully fetched");
+                    @Override
+                    public void onResponse(Call<BatchResponse> call, Response<BatchResponse> response) {
+                        if (response.isSuccessful()) {
+                            Log.i(TAG, "Stock batch data successfully fetched");
 
-                    BatchResponse batch = response.body();
+                            BatchResponse batch = response.body();
 
-                    // Hide progress dialogue
-                    stockProgress.cancel();
-                }
-            }
+                            // Hide progress dialogue
+                            stockProgress.cancel();
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<BatchResponse> call, Throwable t) {
-                Log.e(TAG, "Stock batch call failure", t);
-            }
-        });
+                    @Override
+                    public void onFailure(Call<BatchResponse> call, Throwable t) {
+                        Log.e(TAG, "Stock batch call failure", t);
+                    }
+                });
 
         saveStocksToSharedPref();
     }
@@ -264,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(final View view) {
             AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
             b.setTitle("Track new stock");
-            View v = getLayoutInflater().inflate(R.layout.dialog_view,null);
+            View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
             b.setView(v);
             final TextView stockSearchInput = (TextView) v.findViewById(R.id.stock_search_input);
             b.setCancelable(false);
