@@ -41,7 +41,7 @@ import static com.hungryhackers.stocks.StringConstants.API_KEY;
 import static com.hungryhackers.stocks.StringConstants.FIRSTLOGIN;
 import static com.hungryhackers.stocks.StringConstants.STOCKSYMBOLS;
 
-public class MainActivity extends AppCompatActivity implements StockAsyncTask.StockDownloadListener, SymbolAsyncTask.SymbolDownloadListener {
+public class MainActivity extends AppCompatActivity {
 
     ListView stockListView;
 
@@ -218,112 +218,13 @@ public class MainActivity extends AppCompatActivity implements StockAsyncTask.St
 
     private void fetchSymbolList(String companyName) {
         symbolProgress.show();
-        String urlString = "http://stocksearchapi.com/api/?search_text=" + companyName + "&api_key=" + API_KEY;
-        SymbolAsyncTask task = new SymbolAsyncTask();
-        task.setSymbolDownloadListener(this);
-        task.execute(urlString);
     }
 
 
     private void fetchStockList(StringBuffer stockSymbols, int mode) {
         stockProgress.show();
 
-        String urlString = "https://query.yahooapis.com/v1/public/yql" + "?" + "q=select%20symbol%2CChange%2CBookValue%20from%20yahoo.finance.quotes%20where%20symbol%20in%20(" +
-                stockSymbols + ")&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-
-        StockAsyncTask task = new StockAsyncTask();
-        task.setStockDownloadListener(this, mode);
-        task.execute(urlString);
         saveStocksToSharedPref();
-    }
-
-
-
-    @Override
-    public void onStockDownloadComplete(ArrayList<Stock> stocks, int mode) {
-        stockProgress.cancel();
-        if (stocks == null){
-            return;
-        }
-        if (mode == 0){
-            stocksList.clear();
-            stocksList.addAll(stocks);
-            stockNames.clear();
-            for (Stock s : stocks) {
-                stockNames.add(s.symbol);
-            }
-        }else if (mode == 1){
-            stocksList.addAll(stocks);
-            stockNames.add(stocks.get(0).symbol);
-            Toast.makeText(this, "Stock Added", Toast.LENGTH_SHORT).show();
-        }
-
-        arrayAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onSymbolDownloadComplete(final ArrayList<StockSymbol> symbols) {
-        symbolProgress.cancel();
-        if (symbols == null){
-            Toast.makeText(this, "No company matching your search found", Toast.LENGTH_SHORT).show();
-        }else {
-            ArrayList<String> names = new ArrayList<>();
-            for (int i=0 ; i<symbols.size() ; i++){
-                if (stockSymbolSet.contains(symbols.get(i).companySymbol)){
-                    symbols.remove(i);
-                    i--;
-                }else {
-                    names.add(symbols.get(i).companyName);
-                }
-            }
-
-            if (symbols.size() > 1){
-                AlertDialog.Builder b = new AlertDialog.Builder(this);
-                b.setTitle("Many results found!!");
-
-                String[] items = names.toArray(new String[names.size()]);
-                b.setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        StringBuffer symbolToUrlFormat = new StringBuffer();
-                        symbolToUrlFormat.append("%22" + symbols.get(which).companySymbol + "%22");
-                        stockSymbolSet.add(symbols.get(which).companySymbol);
-
-
-                        if (stockSymbolArrayList.isEmpty()){
-                            stockSymbolArrayList.add(symbolToUrlFormat.toString());
-                        }else {
-                            String s = "%2C" + symbolToUrlFormat.toString();
-                            //symbolToUrlFormat.append("%22" + symbols.get(which).companySymbol + "%22");
-                            stockSymbolArrayList.add(s);
-                        }
-                        fetchStockList(symbolToUrlFormat, 1);
-
-                    }
-                });
-                AlertDialog alert = b.create();
-                alert.getListView().setFastScrollEnabled(true);
-                alert.getListView().setVerticalScrollBarEnabled(true);
-                alert.show();
-            }else {
-                if (stockSymbolArrayList.toString().contains(symbols.get(0).companySymbol)){
-                    Toast.makeText(this, "Company already added", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                StringBuffer symbolToUrlFormat = new StringBuffer();
-                symbolToUrlFormat.append("%22" + symbols.get(0).companySymbol + "%22");
-
-                if (stockSymbolArrayList.isEmpty()){
-                    stockSymbolArrayList.add(symbolToUrlFormat.toString());
-                }else {
-                    String s = "%2C" + symbolToUrlFormat.toString();
-                    //symbolToUrlFormat.append("%22" + symbols.get(which).companySymbol + "%22");
-                    stockSymbolArrayList.add(s);
-                }
-                fetchStockList(symbolToUrlFormat, 1);
-            }
-
-        }
     }
 
     View.OnClickListener fabAddListener = new View.OnClickListener() {
