@@ -27,6 +27,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hungryhackers.stocks.models.BatchResponse;
+import com.hungryhackers.stocks.models.StockResponse;
+import com.hungryhackers.stocks.network.ApiClient;
+
 import org.json.JSONArray;
 
 import java.util.AbstractCollection;
@@ -37,12 +41,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import static com.hungryhackers.stocks.StringConstants.API_KEY;
 import static com.hungryhackers.stocks.StringConstants.FIRSTLOGIN;
 import static com.hungryhackers.stocks.StringConstants.STOCKSYMBOLS;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     ListView stockListView;
 
     ArrayList<Stock> stocksList;
@@ -222,7 +231,30 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void fetchStockList(StringBuffer stockSymbols, int mode) {
+        // Show progress dialogue
         stockProgress.show();
+
+        // Start network call
+        ApiClient.getApiInterface()
+                .getStockBatch(stockSymbols.toString())
+                .enqueue(new Callback<BatchResponse>() {
+            @Override
+            public void onResponse(Call<BatchResponse> call, Response<BatchResponse> response) {
+                if (response.isSuccessful()) {
+                    Log.i(TAG, "Stock batch data successfully fetched");
+
+                    BatchResponse batch = response.body();
+
+                    // Hide progress dialogue
+                    stockProgress.cancel();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BatchResponse> call, Throwable t) {
+                Log.e(TAG, "Stock batch call failure", t);
+            }
+        });
 
         saveStocksToSharedPref();
     }
