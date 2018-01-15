@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.e(TAG, "Stock batch response body null");
                                 return;
                             }
-                            stocksList.addAll(batch.getStockListFromBatch());
+                            stocksList.addAll(batch.qoutes);
                             stockAdapter.notifyDataSetChanged();
 
                             // Hide progress dialogue

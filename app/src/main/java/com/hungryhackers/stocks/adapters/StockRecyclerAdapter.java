@@ -39,7 +39,7 @@ public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdap
     @Override
     public void onBindViewHolder(StockViewHolder holder, int position) {
         Stock stock = mStockList.get(position);
-        holder.bidTextView.setText(stock.bid);
+        holder.bidTextView.setText(stock.price);
         holder.symbolTextView.setText(stock.symbol);
 //        holder.changeTextView.setText(stock.change);
 //        if (stock.change.charAt(0) == '+'){
