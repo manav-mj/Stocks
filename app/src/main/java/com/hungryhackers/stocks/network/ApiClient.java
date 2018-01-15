@@ -17,10 +17,24 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     private static ApiInterface apiInterface;
 
-    public static ApiInterface getApiInterface(){
+    public static ApiInterface getStockSearchApiInterface(){
 
         if (apiInterface == null){
             Retrofit retrofit = new Retrofit.Builder().baseUrl("https://www.alphavantage.co/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(new OkHttpClient.Builder().addInterceptor(new StockInterceptor()).build())
+                    .build();
+
+            apiInterface = retrofit.create(ApiInterface.class);
+        }
+
+        return apiInterface;
+    }
+
+    public static ApiInterface getSymbolSearchApiInterface(){
+
+        if (apiInterface == null){
+            Retrofit retrofit = new Retrofit.Builder().baseUrl("http://d.yimg.com/autoc.finance.yahoo.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(new OkHttpClient.Builder().addInterceptor(new StockInterceptor()).build())
                     .build();

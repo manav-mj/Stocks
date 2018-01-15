@@ -15,15 +15,17 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.hungryhackers.stocks.adapters.StockRecyclerAdapter;
 import com.hungryhackers.stocks.models.BatchResponse;
 import com.hungryhackers.stocks.models.Stock;
+import com.hungryhackers.stocks.models.StockSymbol;
+import com.hungryhackers.stocks.models.SymbolResponse;
 import com.hungryhackers.stocks.network.ApiClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,17 +33,16 @@ import retrofit2.Response;
 
 import static com.hungryhackers.stocks.StringConstants.FIRSTLOGIN;
 import static com.hungryhackers.stocks.StringConstants.STOCKSYMBOLS;
+import static com.hungryhackers.stocks.StringConstants.SYMBOL_SEARCH_API_URL;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     RecyclerView stockRecyclerView;
+    StockRecyclerAdapter stockAdapter;
 
     ArrayList<Stock> stocksList;
-
     ArrayList<String> stockSymbolArrayList;
-
-    StockRecyclerAdapter stockAdapter;
 
     SharedPreferences.Editor editor;
 
@@ -195,17 +196,12 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    private void fetchSymbolList(String companyName) {
-        symbolProgress.show();
-    }
-
-
     private void fetchStockList(StringBuffer stockSymbols, int mode) {
         // Show progress dialogue
         stockProgress.show();
 
         // Start network call
-        ApiClient.getApiInterface()
+        ApiClient.getStockSearchApiInterface()
                 .getStockBatch(stockSymbols.toString())
                 .enqueue(new Callback<BatchResponse>() {
                     @Override
@@ -214,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.i(TAG, "Stock batch data successfully fetched");
 
                             BatchResponse batch = response.body();
-                            if (batch == null){
+                            if (batch == null) {
                                 Log.e(TAG, "Stock batch response body null");
                                 return;
                             }
@@ -235,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
         saveStocksToSharedPref();
     }
 
+    // On click listener for adding new stock
     View.OnClickListener fabAddListener = new View.OnClickListener() {
         @Override
         public void onClick(final View view) {
@@ -261,4 +258,58 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
         }
     };
+
+    private void fetchSymbolList(String companyName) {
+        // Show progress dialogue
+        symbolProgress.show();
+
+        ApiClient.getSymbolSearchApiInterface().getSymbolForQuery(SYMBOL_SEARCH_API_URL, companyName).enqueue(new Callback<SymbolResponse>() {
+            @Override
+            public void onResponse(Call<SymbolResponse> call, Response<SymbolResponse> response) {
+                if (response.isSuccessful()) {
+                    setSymbolDialogue(response.body().resultSet.result);
+
+                    // Hide progress dialogue
+                    symbolProgress.cancel();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SymbolResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void setSymbolDialogue(final ArrayList<StockSymbol> symbols) {
+        if (symbols.size() > 1) {
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
+            b.setTitle("Many results found!!");
+
+            String[] items = new String[symbols.size()];
+
+            for (int i = 0; i < symbols.size(); i++) {
+                items[i] = symbols.get(i).getName();
+            }
+            b.setItems(items, (dialog, which) -> {
+                String symbol = symbols.get(which).getSymbol();
+                stockSymbolArrayList.add(symbol);
+                fetchStockList(new StringBuffer(symbol), 1);
+            });
+            AlertDialog alert = b.create();
+            alert.getListView().setFastScrollEnabled(true);
+            alert.getListView().setVerticalScrollBarEnabled(true);
+            alert.show();
+
+        } else {
+            String symbol = symbols.get(0).getSymbol();
+            if (stockSymbolArrayList.toString().contains(symbol)) {
+                Toast.makeText(this, "Company already added", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            stockSymbolArrayList.add(symbol);
+            fetchStockList(new StringBuffer(symbol), 1);
+        }
+    }
 }

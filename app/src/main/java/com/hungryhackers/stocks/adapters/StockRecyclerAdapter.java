@@ -1,4 +1,4 @@
-package com.hungryhackers.stocks;
+package com.hungryhackers.stocks.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.hungryhackers.stocks.R;
 import com.hungryhackers.stocks.models.Stock;
 
 import java.util.ArrayList;
