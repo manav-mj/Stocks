@@ -7,7 +7,6 @@ import com.hungryhackers.stocks.models.SymbolResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
-import retrofit2.http.QueryName;
 import retrofit2.http.Url;
 
 /**
