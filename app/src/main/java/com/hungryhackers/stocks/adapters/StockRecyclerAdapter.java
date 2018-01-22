@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.hungryhackers.stocks.R;
 import com.hungryhackers.stocks.models.Stock;
+import com.hungryhackers.stocks.models.StockViewModel;
 
 import java.util.ArrayList;
 
@@ -22,11 +23,11 @@ import butterknife.ButterKnife;
 public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdapter.StockViewHolder>{
 
     Context mContext;
-    ArrayList<Stock> mStockList;
+    StockViewModel stockViewModel;
 
-    public StockRecyclerAdapter(Context mContext, ArrayList<Stock> mStockList) {
+    public StockRecyclerAdapter(Context mContext, StockViewModel stockViewModel) {
         this.mContext = mContext;
-        this.mStockList = mStockList;
+        this.stockViewModel = stockViewModel;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdap
 
     @Override
     public void onBindViewHolder(StockViewHolder holder, int position) {
-        Stock stock = mStockList.get(position);
+        Stock stock = stockViewModel.getStockList().getValue().get(position);
         holder.bidTextView.setText(stock.price);
         holder.symbolTextView.setText(stock.symbol);
 //        holder.changeTextView.setText(stock.change);
@@ -51,7 +52,9 @@ public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdap
 
     @Override
     public int getItemCount() {
-        return mStockList.size();
+        if (!stockViewModel.dataIsNull())
+            return stockViewModel.getStockList().getValue().size();
+        return 0;
     }
 
     public class StockViewHolder extends RecyclerView.ViewHolder {

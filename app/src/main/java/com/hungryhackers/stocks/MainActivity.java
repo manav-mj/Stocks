@@ -1,7 +1,5 @@
 package com.hungryhackers.stocks;
 
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -18,97 +15,99 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hungryhackers.stocks.adapters.StockRecyclerAdapter;
-import com.hungryhackers.stocks.models.BatchResponse;
-import com.hungryhackers.stocks.models.Stock;
 import com.hungryhackers.stocks.models.StockSymbol;
-import com.hungryhackers.stocks.models.SymbolResponse;
-import com.hungryhackers.stocks.network.ApiClient;
+import com.hungryhackers.stocks.models.StockViewModel;
+import com.hungryhackers.stocks.network.StockRepository;
+import com.hungryhackers.stocks.utils.StockUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.hungryhackers.stocks.StringConstants.FIRSTLOGIN;
 import static com.hungryhackers.stocks.StringConstants.STOCKSYMBOLS;
-import static com.hungryhackers.stocks.StringConstants.SYMBOL_SEARCH_API_URL;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    public static final String STOCK_DELIMITER_FOR_SP = ",";
+
+    @BindView(R.id.fab_cancel)
+    FloatingActionButton fabCancel;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+    @BindView(R.id.stock_recycler_view)
     RecyclerView stockRecyclerView;
-    StockRecyclerAdapter stockAdapter;
 
-    ArrayList<Stock> stocksList;
-    ArrayList<String> stockSymbolArrayList;
+    private StockRecyclerAdapter stockAdapter;
 
-    SharedPreferences.Editor editor;
+    private StockViewModel stockViewModel;
 
-    ProgressDialog stockProgress, symbolProgress;
+    private SharedPreferences.Editor editor;
 
-    Boolean checkFlag = false;
+    private Boolean checkFlag = false;
 
-    Animation fabOpen, fabClose;
+    private Animation fabOpen, fabClose;
+
+    private StockRepository stockRepository;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        stockProgress = new ProgressDialog(this);
-        symbolProgress = new ProgressDialog(this);
+        ButterKnife.bind(this);
 
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
 
-        stockProgress.setCancelable(false);
-        symbolProgress.setCancelable(false);
-        stockProgress.setMessage("Fetching Stock Information..");
-        symbolProgress.setMessage("Fetching stock symbol..");
+        stockViewModel = new StockViewModel();
 
-        stocksList = new ArrayList<>();
-        stockSymbolArrayList = new ArrayList<>();
+//        fab.setOnClickListener(fabAddListener);
 
-        stockRecyclerView = findViewById(R.id.stock_recycler_view);
-        stockRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        stockAdapter = new StockRecyclerAdapter(this, stocksList);
-        stockRecyclerView.setAdapter(stockAdapter);
-
-        final FloatingActionButton fabCancel = (FloatingActionButton) findViewById(R.id.fab_cancel);
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(fabAddListener);
-        fabCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fabCancel.startAnimation(fabClose);
-//                arrayAdapter.notifyDataSetChanged();
-                fab.setImageResource(R.drawable.ic_add_black_48dp);
-                fab.setOnClickListener(fabAddListener);
-                checkFlag = false;
-                for (Stock s :
-                        stocksList) {
-                    s.setChecked(false);
-                }
-            }
-        });
+//        fabCancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                fabCancel.startAnimation(fabClose);
+////                arrayAdapter.notifyDataSetChanged();
+//                fab.setImageResource(R.drawable.ic_add_black_48dp);
+//                fab.setOnClickListener(fabAddListener);
+//                checkFlag = false;
+//                for (Stock s :
+//                        stocksList) {
+//                    s.setChecked(false);
+//                }
+//            }
+//        });
 
         SharedPreferences sp = getSharedPreferences("STOCKS", MODE_PRIVATE);
         editor = sp.edit();
         boolean firstLogin = sp.getBoolean(FIRSTLOGIN, true);
+        stockRepository = new StockRepository(this);
+        stockViewModel.init(firstLogin, stockRepository);
         if (firstLogin) {
-            stockSymbolArrayList.addAll(Arrays.asList("YHOO", "AAPL", "GOOG", "MSFT"));
             firstLogin = false;
             editor.putBoolean(FIRSTLOGIN, firstLogin);
-            saveStocksToSharedPref();
-        } else {
-            String stockSymbols = sp.getString(STOCKSYMBOLS, null);
-            stockSymbolArrayList.clear();
-            stockSymbolArrayList.addAll(Arrays.asList(stockSymbols.split(",")));
         }
+
+        stockViewModel.getSymbolList().observe(this, symbolList -> {
+            saveStocksToSharedPref(StockUtils.convertToString(symbolList));
+        });
+
+        stockViewModel.getStockList().observe(this, stockList -> {
+            stockAdapter.notifyDataSetChanged();
+        });
+
+        stockRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        stockAdapter = new StockRecyclerAdapter(this, stockViewModel);
+        stockRecyclerView.setAdapter(stockAdapter);
 
 //        stockRecyclerView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 //            @Override
@@ -174,133 +173,61 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            }
 //        });
-
-        StringBuffer stockSymbols = new StringBuffer();
-        for (String s : stockSymbolArrayList) {
-            stockSymbols.append(s);
-            stockSymbols.append(",");
-        }
-        stockSymbols.deleteCharAt(stockSymbols.length() - 1);
-        fetchStockList(stockSymbols, 0);
     }
 
-    void saveStocksToSharedPref() {
-        StringBuffer stockSymbols = new StringBuffer();
-        for (String s : stockSymbolArrayList) {
-            stockSymbols.append(s + ",");
-        }
-        if (!stockSymbols.toString().isEmpty()) {
-            stockSymbols.deleteCharAt(stockSymbols.length() - 1);
-        }
-        editor.putString(STOCKSYMBOLS, stockSymbols.toString());
+    void saveStocksToSharedPref(String symbolListString) {
+        editor.putString(STOCKSYMBOLS, symbolListString);
         editor.commit();
     }
 
-    private void fetchStockList(StringBuffer stockSymbols, int mode) {
-        // Show progress dialogue
-        stockProgress.show();
-
-        // Start network call
-        ApiClient.getStockSearchApiInterface()
-                .getStockBatch(stockSymbols.toString())
-                .enqueue(new Callback<BatchResponse>() {
-                    @Override
-                    public void onResponse(Call<BatchResponse> call, Response<BatchResponse> response) {
-                        if (response.isSuccessful()) {
-                            Log.i(TAG, "Stock batch data successfully fetched");
-
-                            BatchResponse batch = response.body();
-                            if (batch == null) {
-                                Log.e(TAG, "Stock batch response body null");
-                                return;
-                            }
-                            stocksList.addAll(batch.qoutes);
-                            stockAdapter.notifyDataSetChanged();
-
-                            // Hide progress dialogue
-                            stockProgress.cancel();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<BatchResponse> call, Throwable t) {
-                        Log.e(TAG, "Stock batch call failure", t);
-                    }
-                });
-
-        saveStocksToSharedPref();
-    }
-
     // On click listener for adding new stock
-    View.OnClickListener fabAddListener = view -> {
-        AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
-        b.setTitle("Track new stock");
-        View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
-        b.setView(v);
-        final TextView stockSearchInput = (TextView) v.findViewById(R.id.stock_search_input);
-        b.setCancelable(false);
-        b.setPositiveButton("Add", (dialog, which) -> {
-            String companyName = stockSearchInput.getText().toString();
-            fetchSymbolList(companyName);
-        });
-        b.setNegativeButton("Cancel", (dialog, which) -> {
-            return;
-        });
-        AlertDialog alertDialog = b.create();
-        alertDialog.show();
-    };
-
-    private void fetchSymbolList(String companyName) {
-        // Show progress dialogue
-        symbolProgress.show();
-
-        ApiClient.getSymbolSearchApiInterface().getSymbolForQuery(SYMBOL_SEARCH_API_URL, companyName).enqueue(new Callback<SymbolResponse>() {
-            @Override
-            public void onResponse(Call<SymbolResponse> call, Response<SymbolResponse> response) {
-                if (response.isSuccessful()) {
-                    setSymbolDialogue(response.body().resultSet.result);
-
-                    // Hide progress dialogue
-                    symbolProgress.cancel();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SymbolResponse> call, Throwable t) {
-
-            }
-        });
-    }
-
-    private void setSymbolDialogue(final ArrayList<StockSymbol> symbols) {
-        if (symbols.size() > 1) {
-            AlertDialog.Builder b = new AlertDialog.Builder(this);
-            b.setTitle("Many results found!!");
-
-            String[] items = new String[symbols.size()];
-
-            for (int i = 0; i < symbols.size(); i++) {
-                items[i] = symbols.get(i).getName();
-            }
-            b.setItems(items, (dialog, which) -> {
-                String symbol = symbols.get(which).getSymbol();
-                stockSymbolArrayList.add(symbol);
-                fetchStockList(new StringBuffer(symbol), 1);
-            });
-            AlertDialog alert = b.create();
-            alert.getListView().setFastScrollEnabled(true);
-            alert.getListView().setVerticalScrollBarEnabled(true);
-            alert.show();
-
-        } else {
-            String symbol = symbols.get(0).getSymbol();
-            if (stockSymbolArrayList.toString().contains(symbol)) {
-                Toast.makeText(this, "Company already added", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            stockSymbolArrayList.add(symbol);
-            fetchStockList(new StringBuffer(symbol), 1);
-        }
-    }
+//    View.OnClickListener fabAddListener = view -> {
+//        AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
+//        b.setTitle("Track new stock");
+//        View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
+//        b.setView(v);
+//        final TextView stockSearchInput = (TextView) v.findViewById(R.id.stock_search_input);
+//        b.setCancelable(false);
+//        b.setPositiveButton("Add", (dialog, which) -> {
+//            String companyName = stockSearchInput.getText().toString();
+//            fetchSymbolList(companyName);
+//        });
+//        b.setNegativeButton("Cancel", (dialog, which) -> {
+//            return;
+//        });
+//        AlertDialog alertDialog = b.create();
+//        alertDialog.show();
+//    };
+//
+//    private void setSymbolDialogue(final ArrayList<StockSymbol> symbols) {
+//        if (symbols.size() > 1) {
+//            AlertDialog.Builder b = new AlertDialog.Builder(this);
+//            b.setTitle("Many results found!!");
+//
+//            String[] items = new String[symbols.size()];
+//
+//            for (int i = 0; i < symbols.size(); i++) {
+//                items[i] = symbols.get(i).getName();
+//            }
+//            b.setItems(items, (dialog, which) -> {
+//                String symbol = symbols.get(which).getSymbol();
+//                stockSymbolArrayList.add(symbol);
+////                fetchStockList(new StringBuffer(symbol), 1);
+//            });
+//            AlertDialog alert = b.create();
+//            alert.getListView().setFastScrollEnabled(true);
+//            alert.getListView().setVerticalScrollBarEnabled(true);
+//            alert.show();
+//
+//        } else {
+//            String symbol = symbols.get(0).getSymbol();
+//            if (stockSymbolArrayList.toString().contains(symbol)) {
+//                Toast.makeText(this, "Company already added", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//
+//            stockSymbolArrayList.add(symbol);
+////            fetchStockList(new StringBuffer(symbol), 1);
+//        }
+//    }
 }
