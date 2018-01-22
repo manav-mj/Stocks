@@ -232,31 +232,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // On click listener for adding new stock
-    View.OnClickListener fabAddListener = new View.OnClickListener() {
-        @Override
-        public void onClick(final View view) {
-            AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
-            b.setTitle("Track new stock");
-            View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
-            b.setView(v);
-            final TextView stockSearchInput = (TextView) v.findViewById(R.id.stock_search_input);
-            b.setCancelable(false);
-            b.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String companyName = stockSearchInput.getText().toString();
-                    fetchSymbolList(companyName);
-                }
-            });
-            b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    return;
-                }
-            });
-            AlertDialog alertDialog = b.create();
-            alertDialog.show();
-        }
+    View.OnClickListener fabAddListener = view -> {
+        AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
+        b.setTitle("Track new stock");
+        View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
+        b.setView(v);
+        final TextView stockSearchInput = (TextView) v.findViewById(R.id.stock_search_input);
+        b.setCancelable(false);
+        b.setPositiveButton("Add", (dialog, which) -> {
+            String companyName = stockSearchInput.getText().toString();
+            fetchSymbolList(companyName);
+        });
+        b.setNegativeButton("Cancel", (dialog, which) -> {
+            return;
+        });
+        AlertDialog alertDialog = b.create();
+        alertDialog.show();
     };
 
     private void fetchSymbolList(String companyName) {
