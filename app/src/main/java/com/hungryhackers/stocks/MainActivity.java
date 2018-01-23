@@ -21,7 +21,6 @@ import com.hungryhackers.stocks.network.StockRepository;
 import com.hungryhackers.stocks.utils.StockUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         stockViewModel = new StockViewModel();
 
-//        fab.setOnClickListener(fabAddListener);
+        fab.setOnClickListener(fabAddListener);
 
 //        fabCancel.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -181,53 +180,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // On click listener for adding new stock
-//    View.OnClickListener fabAddListener = view -> {
-//        AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
-//        b.setTitle("Track new stock");
-//        View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
-//        b.setView(v);
-//        final TextView stockSearchInput = (TextView) v.findViewById(R.id.stock_search_input);
-//        b.setCancelable(false);
-//        b.setPositiveButton("Add", (dialog, which) -> {
-//            String companyName = stockSearchInput.getText().toString();
-//            fetchSymbolList(companyName);
-//        });
-//        b.setNegativeButton("Cancel", (dialog, which) -> {
-//            return;
-//        });
-//        AlertDialog alertDialog = b.create();
-//        alertDialog.show();
-//    };
-//
-//    private void setSymbolDialogue(final ArrayList<StockSymbol> symbols) {
-//        if (symbols.size() > 1) {
-//            AlertDialog.Builder b = new AlertDialog.Builder(this);
-//            b.setTitle("Many results found!!");
-//
-//            String[] items = new String[symbols.size()];
-//
-//            for (int i = 0; i < symbols.size(); i++) {
-//                items[i] = symbols.get(i).getName();
-//            }
-//            b.setItems(items, (dialog, which) -> {
-//                String symbol = symbols.get(which).getSymbol();
-//                stockSymbolArrayList.add(symbol);
-////                fetchStockList(new StringBuffer(symbol), 1);
-//            });
-//            AlertDialog alert = b.create();
-//            alert.getListView().setFastScrollEnabled(true);
-//            alert.getListView().setVerticalScrollBarEnabled(true);
-//            alert.show();
-//
-//        } else {
-//            String symbol = symbols.get(0).getSymbol();
+    View.OnClickListener fabAddListener = view -> {
+        AlertDialog.Builder b = new AlertDialog.Builder(MainActivity.this);
+        b.setTitle("Track new stock");
+        View v = getLayoutInflater().inflate(R.layout.dialog_view, null);
+        b.setView(v);
+        final TextView stockSearchInput = v.findViewById(R.id.stock_search_input);
+        b.setCancelable(false);
+        b.setPositiveButton("Add", (dialog, which) -> {
+            String companyName = stockSearchInput.getText().toString();
+            stockViewModel.fetchSymbolForName(companyName);
+            stockViewModel.getSymbolSearchResponse().observe(this, this::setSymbolDialogue);
+        });
+        b.setNegativeButton("Cancel", (dialog, which) -> {
+            return;
+        });
+        AlertDialog alertDialog = b.create();
+        alertDialog.show();
+    };
+
+    private void setSymbolDialogue(final ArrayList<StockSymbol> symbols) {
+        if (symbols.size() > 1) {
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
+            b.setTitle("Many results found!!");
+
+            String[] items = new String[symbols.size()];
+
+            for (int i = 0; i < symbols.size(); i++) {
+                items[i] = symbols.get(i).getName();
+            }
+            b.setItems(items, (dialog, which) -> {
+                String symbol = symbols.get(which).getSymbol();
+                stockViewModel.addStockWithSymbol(symbol);
+            });
+            AlertDialog alert = b.create();
+            alert.getListView().setFastScrollEnabled(true);
+            alert.getListView().setVerticalScrollBarEnabled(true);
+            alert.show();
+
+        } else {
+            String symbol = symbols.get(0).getSymbol();
 //            if (stockSymbolArrayList.toString().contains(symbol)) {
 //                Toast.makeText(this, "Company already added", Toast.LENGTH_SHORT).show();
 //                return;
 //            }
-//
-//            stockSymbolArrayList.add(symbol);
-////            fetchStockList(new StringBuffer(symbol), 1);
-//        }
-//    }
+
+            stockViewModel.addStockWithSymbol(symbol);
+        }
+    }
 }

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.hungryhackers.stocks.models.BatchResponse;
 import com.hungryhackers.stocks.models.Stock;
+import com.hungryhackers.stocks.models.StockSymbol;
 import com.hungryhackers.stocks.models.SymbolResponse;
 
 import java.util.ArrayList;
@@ -33,9 +34,13 @@ public class StockRepository {
         this.mContext = mContext;
     }
 
-    public MutableLiveData<ArrayList<Stock>> getStockList(String stockSymbols){
+    public MutableLiveData<ArrayList<Stock>> getStockList(String stockSymbols, MutableLiveData<ArrayList<Stock>> existingStockList) {
+        MutableLiveData<ArrayList<Stock>> stockList;
+        if (existingStockList == null)
+            stockList = new MutableLiveData<>();
+        else
+            stockList = existingStockList;
 
-        MutableLiveData<ArrayList<Stock>> stockList = new MutableLiveData<>();
 
         ApiClient.getStockSearchApiInterface()
                 .getStockBatch(stockSymbols)
@@ -50,7 +55,18 @@ public class StockRepository {
                                 Log.e(TAG, "Stock batch response body null");
                                 return;
                             }
-                            stockList.setValue(batch.qoutes);
+                            if (stockList.getValue() == null) {
+                                stockList.setValue(batch.qoutes);
+                            }else {
+                                if (batch.qoutes.size() == 0) {
+                                    Stock emptyStock = new Stock();
+                                    emptyStock.symbol = call.request().url().queryParameter("query");
+                                    batch.qoutes.add(emptyStock);
+                                    Log.i(TAG, "No stock found for symbol : " + emptyStock.symbol + " : Empty stock added");
+                                }
+                                stockList.getValue().addAll(batch.qoutes);
+                                stockList.setValue(stockList.getValue());
+                            }
                         }
                     }
 
@@ -63,35 +79,39 @@ public class StockRepository {
         return stockList;
     }
 
-    public MutableLiveData<ArrayList<String>> getSymbolList(Boolean firstLogin){
+    public MutableLiveData<ArrayList<String>> getSymbolList(Boolean firstLogin) {
         MutableLiveData<ArrayList<String>> symbolList = new MutableLiveData<>();
 
-        if (firstLogin){
+        if (firstLogin) {
             symbolList.setValue(new ArrayList<>(Arrays.asList("YHOO", "AAPL", "GOOG", "MSFT")));
-        }else {
+        } else {
             // fetch from shared preferences
             String stockSymbols = mContext.getSharedPreferences("STOCKS", MODE_PRIVATE)
-                    .getString(STOCKSYMBOLS, "");
+                    .getString(STOCKSYMBOLS, null);
             symbolList.setValue(new ArrayList<>(Arrays.asList(stockSymbols.split(STOCK_DELIMITER_FOR_SP))));
         }
 
         return symbolList;
     }
 
-    public void fetchSymbolList(String companyName) {
+    public MutableLiveData<ArrayList<StockSymbol>> getSymbolsForName(String companyName) {
+        MutableLiveData<ArrayList<StockSymbol>> symbolSearchResponse = new MutableLiveData<>();
+
         ApiClient.getSymbolSearchApiInterface().getSymbolForQuery(SYMBOL_SEARCH_API_URL, companyName)
                 .enqueue(new Callback<SymbolResponse>() {
-            @Override
-            public void onResponse(Call<SymbolResponse> call, Response<SymbolResponse> response) {
-                if (response.isSuccessful()) {
-//                    setSymbolDialogue(response.body().resultSet.result);
-                }
-            }
+                    @Override
+                    public void onResponse(Call<SymbolResponse> call, Response<SymbolResponse> response) {
+                        if (response.isSuccessful()) {
+                            symbolSearchResponse.setValue(response.body().resultSet.result);
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<SymbolResponse> call, Throwable t) {
+                    @Override
+                    public void onFailure(Call<SymbolResponse> call, Throwable t) {
 
-            }
-        });
+                    }
+                });
+
+        return symbolSearchResponse;
     }
 }
