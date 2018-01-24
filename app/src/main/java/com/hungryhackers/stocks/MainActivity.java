@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
         stockViewModel.getSymbolList().observe(this, symbolList -> {
             saveStocksToSharedPref(StockUtils.convertToString(symbolList));
-        });
+        }); 
 
         stockViewModel.getStockList().observe(this, stockList -> {
             stockAdapter.notifyDataSetChanged();

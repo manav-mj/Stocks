@@ -60,7 +60,7 @@ public class StockRepository {
                             }else {
                                 if (batch.qoutes.size() == 0) {
                                     Stock emptyStock = new Stock();
-                                    emptyStock.symbol = call.request().url().queryParameter("query");
+                                    emptyStock.symbol = call.request().url().queryParameter("symbols");
                                     batch.qoutes.add(emptyStock);
                                     Log.i(TAG, "No stock found for symbol : " + emptyStock.symbol + " : Empty stock added");
                                 }
