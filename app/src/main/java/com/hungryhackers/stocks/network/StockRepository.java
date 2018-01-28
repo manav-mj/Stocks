@@ -11,10 +11,8 @@ import com.hungryhackers.stocks.models.StockSymbol;
 import com.hungryhackers.stocks.models.SymbolResponse;
 import com.hungryhackers.stocks.utils.StockUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;

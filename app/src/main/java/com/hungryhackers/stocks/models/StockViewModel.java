@@ -1,16 +1,12 @@
 package com.hungryhackers.stocks.models;
 
-import android.app.Activity;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.content.Context;
 import android.util.Log;
 
-import com.hungryhackers.stocks.MainActivity;
 import com.hungryhackers.stocks.network.StockRepository;
 import com.hungryhackers.stocks.utils.StockUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**

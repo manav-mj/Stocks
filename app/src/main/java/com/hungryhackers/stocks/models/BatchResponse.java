@@ -6,7 +6,6 @@ import com.hungryhackers.stocks.MainActivity;
 import com.hungryhackers.stocks.utils.StockUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by YourFather on 14-01-2018.
