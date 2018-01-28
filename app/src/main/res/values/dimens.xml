@@ -3,4 +3,5 @@
 
     <!--Search View Dimensions-->
     <dimen name="search_view_height">32dp</dimen>
+    <dimen name="progress_bar_height">15dp</dimen>
 </resources>

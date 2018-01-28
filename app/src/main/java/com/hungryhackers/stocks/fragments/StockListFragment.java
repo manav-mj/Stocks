@@ -149,11 +149,11 @@ public class StockListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnSearchItemClickListener) {
-//            mListener = (OnSearchItemClickListener) context;
+//        if (context instanceof OnSearchFragmentListener) {
+//            mListener = (OnSearchFragmentListener) context;
 //        } else {
 //            throw new RuntimeException(context.toString()
-//                    + " must implement OnSearchItemClickListener");
+//                    + " must implement OnSearchFragmentListener");
 //        }
     }
 

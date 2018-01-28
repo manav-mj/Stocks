@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -23,7 +22,7 @@ import butterknife.ButterKnife;
 
 public class SearchFragment extends Fragment {
 
-    private OnSearchItemClickListener mListener;
+    private OnSearchFragmentListener mListener;
     private StockRepository repository;
     private SearchViewModel searchViewModel;
     private StockViewModel stockViewModel;
@@ -58,11 +57,11 @@ public class SearchFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnSearchItemClickListener) {
-            mListener = (OnSearchItemClickListener) context;
+        if (context instanceof OnSearchFragmentListener) {
+            mListener = (OnSearchFragmentListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnSearchItemClickListener");
+                    + " must implement OnSearchFragmentListener");
         }
     }
 
@@ -93,49 +92,19 @@ public class SearchFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, items);
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new ListView.OnItemClickListener(){
+        mListener.onSearchCompleted();
 
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String symbol = symbols.get(i).getSymbol();
-                stockViewModel.addStockWithSymbol(symbol);
-                listView.setAdapter(null);
-                mListener.onItemClicked();
-            }
+        listView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String symbol = symbols.get(i).getSymbol();
+            stockViewModel.addStockWithSymbol(symbol);
+            listView.setAdapter(null);
+            mListener.onItemClicked();
         });
-
-//        if (symbols.size() > 1) {
-//            AlertDialog.Builder b = new AlertDialog.Builder(getContext());
-//            b.setTitle("Many results found!!");
-//
-//            String[] items = new String[symbols.size()];
-//
-//            for (int i = 0; i < symbols.size(); i++) {
-//                items[i] = symbols.get(i).getName();
-//            }
-//            b.setItems(items, (dialog, which) -> {
-//                String symbol = symbols.get(which).getSymbol();
-//                stockViewModel.addStockWithSymbol(symbol);
-//            });
-//            AlertDialog alert = b.create();
-//            alert.getListView().setFastScrollEnabled(true);
-//            alert.getListView().setVerticalScrollBarEnabled(true);
-//            alert.show();
-//
-//        } else {
-//            String symbol = symbols.get(0).getSymbol();
-////            if (stockSymbolArrayList.toString().contains(symbol)) {
-////                Toast.makeText(this, "Company already added", Toast.LENGTH_SHORT).show();
-////                return;
-////            }
-//
-//            stockViewModel.addStockWithSymbol(symbol);
-//        }
-
     }
 
-    public interface OnSearchItemClickListener {
+    public interface OnSearchFragmentListener {
         // TODO: Update argument type and name
         void onItemClicked();
+        void onSearchCompleted();
     }
 }

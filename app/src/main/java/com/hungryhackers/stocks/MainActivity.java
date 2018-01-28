@@ -1,8 +1,8 @@
 package com.hungryhackers.stocks;
 
 import android.content.Context;
-import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
@@ -13,13 +13,15 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.hungryhackers.stocks.fragments.SearchFragment;
 import com.hungryhackers.stocks.fragments.StockListFragment;
@@ -28,11 +30,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class MainActivity extends AppCompatActivity implements SearchFragment.OnSearchItemClickListener {
+public class MainActivity extends AppCompatActivity implements SearchFragment.OnSearchFragmentListener {
 
     private static final String TAG = "MainActivity";
     public static final String STOCK_DELIMITER_FOR_SP = ",";
     private static final long SEARCH_ANIMATION_DURATION = 100;
+
+    private static long SEARCH_DELAY = 2000;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -42,6 +46,10 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
     EditText searchEditText;
     @BindView(R.id.search_clear_button)
     ImageView searchClearButton;
+    @BindView(R.id.search_status_text_view)
+    TextView statusTextView;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     @BindView(R.id.search_view_constraint_layout)
     ConstraintLayout constraintLayout;
@@ -56,30 +64,12 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
 
     private FragmentManager manager;
 
-    private TextWatcher searchTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    private TextWatcher searchTextWatcher;
 
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            if (!charSequence.toString().isEmpty()) {
-                if (firstCharacterType) {
-                    showClearButton(true);
-                    firstCharacterType = false;
-                }
-            } else {
-                showClearButton(false);
-                firstCharacterType = true;
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            searchFragment.search(editable.toString());
-        }
-    };
+    private Handler searchHandler;
+    private Runnable searchTimer;
+    private String searchString;
+    private long lastTextEditTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,17 +78,7 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
 
         ButterKnife.bind(this);
 
-        setSupportActionBar(toolbar);
-
-        stockFragment = new StockListFragment();
-        searchFragment = new SearchFragment();
-
-        searchEditText.clearFocus();
-
-        initialSet = new ConstraintSet();
-        initialSet.clone(constraintLayout);
-        finalSet = new ConstraintSet();
-        finalSet.clone(this, R.layout.search_view_revealed);
+        initialise();
 
         searchView.setOnClickListener(view -> revealSearchView(true));
         searchEditText.setOnClickListener(view -> revealSearchView(true));
@@ -109,6 +89,75 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
                 .add(R.id.fragment_frame_layout, searchFragment)
                 .hide(searchFragment)
                 .commit();
+    }
+
+    private void initialise() {
+        setSupportActionBar(toolbar);
+
+        searchHandler = new Handler();
+
+        searchTimer = () -> {
+            Log.i(TAG, System.currentTimeMillis() + " : " + lastTextEditTime + SEARCH_DELAY);
+            if (System.currentTimeMillis() > (lastTextEditTime + SEARCH_DELAY)) {
+                Log.i(TAG, "search called");
+                searchFragment.search(searchString);
+            }
+        };
+
+        searchTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+
+                searchHandler.removeCallbacks(searchTimer);
+
+                if (!charSequence.toString().isEmpty()) {
+                    if (firstCharacterType) {
+                        showClearButton(true);
+                        showProgress(true);
+                        firstCharacterType = false;
+                    }
+                } else {
+                    showClearButton(false);
+                    showProgress(false);
+                    firstCharacterType = true;
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (!editable.toString().isEmpty()) {
+                    showProgress(true);
+
+                    searchString = editable.toString();
+
+                    lastTextEditTime = System.currentTimeMillis();
+                    searchHandler.postDelayed(searchTimer, SEARCH_DELAY);
+                } else searchFragment.search(editable.toString());
+            }
+        };
+
+        stockFragment = new StockListFragment();
+        searchFragment = new SearchFragment();
+
+        searchEditText.clearFocus();
+
+        initialSet = new ConstraintSet();
+        initialSet.clone(constraintLayout);
+        finalSet = new ConstraintSet();
+        finalSet.clone(this, R.layout.search_view_revealed);
+    }
+
+    private void showProgress(boolean show) {
+        statusTextView.setText(show
+                ? getResources().getString(R.string.search_status_validating)
+                : getResources().getString(R.string.search_status_normal)
+        );
+        progressBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void onSearchClick(View view) {
@@ -192,5 +241,10 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
     @Override
     public void onItemClicked() {
         revealSearchView(false);
+    }
+
+    @Override
+    public void onSearchCompleted() {
+        showProgress(false);
     }
 }
