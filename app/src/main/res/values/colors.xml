@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#4b5a7b</color>
-    <color name="colorPrimaryDark">#4b5a7b</color>
-    <color name="colorAccent">#7ba5f4</color>
-    <color name="green">#008000</color>
-    <color name="red">#FF0000</color>
+    <color name="colorPrimary">#141414</color>
+    <color name="colorPrimaryDark">#141414</color>
+    <color name="colorAccent">#2fa1d5</color>
+    <color name="green">#4cda64</color>
+    <color name="red">#ff3a2f</color>
+    <color name="search_view_bg_color">#262626</color>
+    <color name="light_grey_text">#8e8e8e</color>
 </resources>

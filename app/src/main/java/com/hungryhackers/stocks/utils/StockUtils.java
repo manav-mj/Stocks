@@ -3,6 +3,7 @@ package com.hungryhackers.stocks.utils;
 import com.hungryhackers.stocks.MainActivity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by YourFather on 23-01-2018.
@@ -20,5 +21,9 @@ public class StockUtils {
         // Remove last delimiter with setLength.
         builder.setLength(builder.length() - 1);
         return builder.toString();
+    }
+
+    public static ArrayList<String> convertToArrayList(String string, String delimiter){
+        return new ArrayList<>(Arrays.asList(string.split(delimiter)));
     }
 }

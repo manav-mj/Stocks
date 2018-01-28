@@ -30,4 +30,11 @@ public class Stock {
 
     Boolean isChecked;
 
+    public Stock() {
+    }
+
+    public Stock(String symbol) {
+
+        this.symbol = symbol;
+    }
 }

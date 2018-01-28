@@ -20,16 +20,18 @@ import java.util.ArrayList;
 public class StockViewModel extends ViewModel {
     private static final String TAG = "StockViewModel";
 
-    private MutableLiveData<ArrayList<Stock>> stockList;
-    private MutableLiveData<ArrayList<String>> symbolList;
-    private MutableLiveData<ArrayList<StockSymbol>> symbolSearchResponse;
+    private static MutableLiveData<ArrayList<Stock>> stockList;
+    private static MutableLiveData<ArrayList<String>> symbolList;
+    private static MutableLiveData<ArrayList<StockSymbol>> symbolSearchResponse;
     private StockRepository stockRepo;
 
     public void init(Boolean firstLogin, StockRepository stockRepository){
         stockRepo = stockRepository;
-        symbolList = stockRepo.getSymbolList(firstLogin);
-        stockList = stockRepo.getStockList(StockUtils.convertToString(symbolList.getValue()), null);
-        Log.i(TAG, "stockList initialised for the first time");
+        if (symbolList == null && stockList == null) {
+            symbolList = stockRepo.getSymbolList(firstLogin);
+            stockList = stockRepo.getStockList(StockUtils.convertToString(symbolList.getValue()));
+            Log.i(TAG, "stockList initialised for the first time");
+        }
     }
 
     public MutableLiveData<ArrayList<Stock>> getStockList() {
@@ -56,6 +58,6 @@ public class StockViewModel extends ViewModel {
         symbolList.getValue().add(symbol);
         symbolList.setValue(symbolList.getValue());
 
-        stockRepo.getStockList(symbol, stockList);
+        stockRepo.getStockList(symbol);
     }
 }

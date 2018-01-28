@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/search_view_constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:layout_marginEnd="15dp"
+    android:gravity="center_horizontal|bottom"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/search_status_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Type a company name or stock symbol"
+        android:textColor="@android:color/white"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toTopOf="@+id/search_view_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/search_view_layout"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/search_view_height"
+        android:background="@drawable/search_bg"
+        android:onClick="onSearchClick"
+        android:padding="5dp"
+        android:layout_marginEnd="10dp"
+        android:transitionName="search_view_transition"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/search_view_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <ImageView
+            android:id="@+id/search_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="onSearchClick"
+            android:src="@android:drawable/ic_menu_search"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/search_view_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/transparent"
+            android:gravity="center_vertical"
+            android:hint="Search"
+            android:onClick="onSearchClick"
+            android:textColorHint="@color/light_grey_text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/search_icon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/search_clear_button"
+            android:visibility="invisible"
+            android:padding="3dp"
+            android:layout_width="20dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_cancel_white_48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+
+    <TextView
+        android:id="@+id/search_view_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="Cancel"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hor_guideline" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/hor_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="@dimen/search_view_height" />
+
+</android.support.constraint.ConstraintLayout>

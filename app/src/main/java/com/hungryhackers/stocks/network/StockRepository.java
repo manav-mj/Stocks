@@ -4,13 +4,17 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.util.Log;
 
+import com.hungryhackers.stocks.MainActivity;
 import com.hungryhackers.stocks.models.BatchResponse;
 import com.hungryhackers.stocks.models.Stock;
 import com.hungryhackers.stocks.models.StockSymbol;
 import com.hungryhackers.stocks.models.SymbolResponse;
+import com.hungryhackers.stocks.utils.StockUtils;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,7 +22,7 @@ import retrofit2.Response;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.hungryhackers.stocks.MainActivity.STOCK_DELIMITER_FOR_SP;
-import static com.hungryhackers.stocks.StringConstants.STOCKSYMBOLS;
+import static com.hungryhackers.stocks.StringConstants.SP_STOCK_SYMBOL_KEY;
 import static com.hungryhackers.stocks.StringConstants.SYMBOL_SEARCH_API_URL;
 
 /**
@@ -28,20 +32,19 @@ import static com.hungryhackers.stocks.StringConstants.SYMBOL_SEARCH_API_URL;
 public class StockRepository {
     private static final String TAG = "StockRepository";
 
-    Context mContext;
+    private Context mContext;
+    private static MutableLiveData<ArrayList<Stock>> stockList;
+    private static MutableLiveData<ArrayList<String>> symbolList;
 
     public StockRepository(Context mContext) {
         this.mContext = mContext;
+        if (stockList == null && symbolList == null) {
+            stockList = new MutableLiveData<>();
+            symbolList = new MutableLiveData<>();
+        }
     }
 
-    public MutableLiveData<ArrayList<Stock>> getStockList(String stockSymbols, MutableLiveData<ArrayList<Stock>> existingStockList) {
-        MutableLiveData<ArrayList<Stock>> stockList;
-        if (existingStockList == null)
-            stockList = new MutableLiveData<>();
-        else
-            stockList = existingStockList;
-
-
+    public MutableLiveData<ArrayList<Stock>> getStockList(String stockSymbols) {
         ApiClient.getStockSearchApiInterface()
                 .getStockBatch(stockSymbols)
                 .enqueue(new Callback<BatchResponse>() {
@@ -57,12 +60,20 @@ public class StockRepository {
                             }
                             if (stockList.getValue() == null) {
                                 stockList.setValue(batch.qoutes);
-                            }else {
+
+                                // Check for empty stocks
+                                ArrayList<String> symbols = StockUtils.convertToArrayList(stockSymbols, MainActivity.STOCK_DELIMITER_FOR_SP);
+                                if (symbols.size() > batch.qoutes.size()) {
+                                    for (String s : symbols) {
+                                        if (!batch.hasSymbol(s)) {
+                                            batch.qoutes.add(new Stock(s));
+                                        }
+                                    }
+                                }
+                            } else {
                                 if (batch.qoutes.size() == 0) {
-                                    Stock emptyStock = new Stock();
-                                    emptyStock.symbol = call.request().url().queryParameter("symbols");
-                                    batch.qoutes.add(emptyStock);
-                                    Log.i(TAG, "No stock found for symbol : " + emptyStock.symbol + " : Empty stock added");
+                                    batch.qoutes.add(new Stock(stockSymbols));
+                                    Log.i(TAG, "No stock found for symbol : " + stockSymbols + " : Empty stock added");
                                 }
                                 stockList.getValue().addAll(batch.qoutes);
                                 stockList.setValue(stockList.getValue());
@@ -80,15 +91,19 @@ public class StockRepository {
     }
 
     public MutableLiveData<ArrayList<String>> getSymbolList(Boolean firstLogin) {
-        MutableLiveData<ArrayList<String>> symbolList = new MutableLiveData<>();
 
         if (firstLogin) {
             symbolList.setValue(new ArrayList<>(Arrays.asList("YHOO", "AAPL", "GOOG", "MSFT")));
         } else {
             // fetch from shared preferences
             String stockSymbols = mContext.getSharedPreferences("STOCKS", MODE_PRIVATE)
-                    .getString(STOCKSYMBOLS, null);
-            symbolList.setValue(new ArrayList<>(Arrays.asList(stockSymbols.split(STOCK_DELIMITER_FOR_SP))));
+                    .getString(SP_STOCK_SYMBOL_KEY, null);
+
+            if (stockSymbols == null) {
+                getSymbolList(true);
+            } else {
+                symbolList.setValue(new ArrayList<>(Arrays.asList(stockSymbols.split(STOCK_DELIMITER_FOR_SP))));
+            }
         }
 
         return symbolList;

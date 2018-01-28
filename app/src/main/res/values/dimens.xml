@@ -1,3 +1,6 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+
+    <!--Search View Dimensions-->
+    <dimen name="search_view_height">32dp</dimen>
 </resources>
