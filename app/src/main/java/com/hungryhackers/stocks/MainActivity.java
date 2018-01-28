@@ -77,8 +77,7 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!editable.toString().isEmpty())
-                searchFragment.search(editable.toString());
+            searchFragment.search(editable.toString());
         }
     };
 
@@ -146,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
             searchEditText.requestFocusFromTouch();
             searchEditText.addTextChangedListener(searchTextWatcher);
 
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
         } else {
             animationSet = initialSet;
@@ -157,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
                 searchEditText.setText("");
             searchEditText.removeTextChangedListener(searchTextWatcher);
 
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         }
         alreadyRevealed = !alreadyRevealed;

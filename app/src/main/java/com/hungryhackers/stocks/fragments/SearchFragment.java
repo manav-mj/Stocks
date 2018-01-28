@@ -73,6 +73,11 @@ public class SearchFragment extends Fragment {
     }
 
     public void search(String companyName) {
+        if (companyName.isEmpty()) {
+            listView.setAdapter(null);
+            return;
+        }
+
         stockViewModel.fetchSymbolForName(companyName);
         stockViewModel.getSymbolSearchResponse().observe(this, this::setSymbolDialogue);
     }
