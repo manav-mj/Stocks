@@ -5,6 +5,7 @@
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     tools:context="com.hungryhackers.stocks.MainActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -70,6 +71,7 @@
                         android:layout_height="0dp"
                         android:layout_marginEnd="8dp"
                         android:background="@android:color/transparent"
+                        android:focusable="false"
                         android:gravity="center_vertical"
                         android:hint="Search"
                         android:inputType="textShortMessage"
@@ -81,16 +83,16 @@
 
                     <ImageView
                         android:id="@+id/search_clear_button"
-                        android:visibility="invisible"
-                        android:padding="3dp"
                         android:layout_width="20dp"
                         android:layout_height="0dp"
+                        android:padding="3dp"
                         android:src="@drawable/ic_cancel_white_48dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        android:visibility="invisible"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintHorizontal_bias="1.0"/>
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </android.support.constraint.ConstraintLayout>
 

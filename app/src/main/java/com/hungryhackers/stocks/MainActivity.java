@@ -1,5 +1,7 @@
 package com.hungryhackers.stocks;
 
+import android.content.Context;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -13,7 +15,11 @@ import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.hungryhackers.stocks.fragments.SearchFragment;
 import com.hungryhackers.stocks.fragments.StockListFragment;
@@ -34,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
     View searchView;
     @BindView(R.id.search_view_edit_text)
     EditText searchEditText;
+    @BindView(R.id.search_clear_button)
+    ImageView searchClearButton;
 
     @BindView(R.id.search_view_constraint_layout)
     ConstraintLayout constraintLayout;
@@ -41,11 +49,38 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
     ConstraintSet initialSet, finalSet;
 
     private Boolean alreadyRevealed = false;
+    private Boolean firstCharacterType = true;
 
     StockListFragment stockFragment;
     SearchFragment searchFragment;
 
     private FragmentManager manager;
+
+    private TextWatcher searchTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            if (!charSequence.toString().isEmpty()) {
+                if (firstCharacterType) {
+                    showClearButton(true);
+                    firstCharacterType = false;
+                }
+            } else {
+                showClearButton(false);
+                firstCharacterType = true;
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (!editable.toString().isEmpty())
+                searchFragment.search(editable.toString());
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
         finalSet.clone(this, R.layout.search_view_revealed);
 
         searchView.setOnClickListener(view -> revealSearchView(true));
+        searchEditText.setOnClickListener(view -> revealSearchView(true));
+
 
         manager = getSupportFragmentManager();
         manager.beginTransaction().add(R.id.fragment_frame_layout, stockFragment)
@@ -81,15 +118,14 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
 
     @Override
     public void onBackPressed() {
-        if (alreadyRevealed)revealSearchView(false);
+        if (alreadyRevealed) revealSearchView(false);
         else super.onBackPressed();
     }
 
     void revealSearchView(boolean reveal) {
 
         if (reveal == alreadyRevealed) {
-            if (reveal)
-                startSearching();
+            searchEditText.requestFocusFromTouch();
             return;
         }
 
@@ -106,12 +142,23 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
             animationSet = finalSet;
             showFrag = searchFragment;
             hideFrag = stockFragment;
-            startSearching();
+
+            searchEditText.requestFocusFromTouch();
+            searchEditText.addTextChangedListener(searchTextWatcher);
+
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
         } else {
-            searchEditText.setText("");
             animationSet = initialSet;
             showFrag = stockFragment;
             hideFrag = searchFragment;
+
+            if (!searchEditText.getText().toString().isEmpty())
+                searchEditText.setText("");
+            searchEditText.removeTextChangedListener(searchTextWatcher);
+
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         }
         alreadyRevealed = !alreadyRevealed;
 
@@ -123,31 +170,20 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
                 .commit();
     }
 
-    private void startSearching() {
-        searchEditText.bringToFront();
-        searchEditText.requestFocus();
-        searchEditText.requestFocusFromTouch();
-        searchEditText.setShowSoftInputOnFocus(true);
-        toolbar.setFocusable(false);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (!editable.toString().isEmpty())
-                    searchFragment.search(editable.toString());
-            }
-        });
+    private void showClearButton(boolean show) {
+        Animation anim;
+        if (show) {
+            anim = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+            searchClearButton.setOnClickListener(view -> {
+                searchEditText.setText("");
+                searchEditText.requestFocusFromTouch();
+            });
+        } else {
+            anim = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+            searchClearButton.setOnClickListener(null);
+        }
+        searchClearButton.setVisibility(View.VISIBLE);
+        searchClearButton.startAnimation(anim);
     }
 
     public void cancelSearch(View view) {
