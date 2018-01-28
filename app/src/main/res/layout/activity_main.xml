@@ -47,7 +47,6 @@
                     android:layout_height="@dimen/search_view_height"
                     android:background="@drawable/search_bg"
                     android:padding="5dp"
-                    android:transitionName="search_view_transition"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
