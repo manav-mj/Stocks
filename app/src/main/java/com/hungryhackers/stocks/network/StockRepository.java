@@ -57,23 +57,23 @@ public class StockRepository {
                                 return;
                             }
                             if (stockList.getValue() == null) {
-                                stockList.setValue(batch.qoutes);
+                                stockList.setValue(batch.quotes);
 
                                 // Check for empty stocks
                                 ArrayList<String> symbols = StockUtils.convertToArrayList(stockSymbols, MainActivity.STOCK_DELIMITER_FOR_SP);
-                                if (symbols.size() > batch.qoutes.size()) {
+                                if (symbols.size() > batch.quotes.size()) {
                                     for (String s : symbols) {
                                         if (!batch.hasSymbol(s)) {
-                                            batch.qoutes.add(new Stock(s));
+                                            batch.quotes.add(new Stock(s));
                                         }
                                     }
                                 }
                             } else {
-                                if (batch.qoutes.size() == 0) {
-                                    batch.qoutes.add(new Stock(stockSymbols));
+                                if (batch.quotes.size() == 0) {
+                                    batch.quotes.add(new Stock(stockSymbols));
                                     Log.i(TAG, "No stock found for symbol : " + stockSymbols + " : Empty stock added");
                                 }
-                                stockList.getValue().addAll(batch.qoutes);
+                                stockList.getValue().addAll(batch.quotes);
                                 stockList.setValue(stockList.getValue());
                             }
                         }

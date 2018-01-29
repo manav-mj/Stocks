@@ -15,7 +15,7 @@ public class BatchResponse {
 
     @SerializedName("Stock Quotes")
     @Expose
-    public ArrayList<Stock> qoutes;
+    public ArrayList<Stock> quotes;
 
     private ArrayList<String> allStocks;
 
@@ -23,7 +23,7 @@ public class BatchResponse {
         if (allStocks == null) {
             StringBuilder builder = new StringBuilder();
             for (Stock s :
-                    qoutes) {
+                    quotes) {
                 builder.append(s.symbol);
                 builder.append(MainActivity.STOCK_DELIMITER_FOR_SP);
             }
