@@ -97,9 +97,7 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
         searchHandler = new Handler();
 
         searchTimer = () -> {
-            Log.i(TAG, System.currentTimeMillis() + " : " + lastTextEditTime + SEARCH_DELAY);
             if (System.currentTimeMillis() > (lastTextEditTime + SEARCH_DELAY)) {
-                Log.i(TAG, "search called");
                 searchFragment.search(searchString);
             }
         };

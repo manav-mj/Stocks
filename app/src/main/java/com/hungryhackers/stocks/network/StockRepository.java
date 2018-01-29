@@ -33,7 +33,6 @@ public class StockRepository {
     private Context mContext;
     private static MutableLiveData<ArrayList<Stock>> stockList;
     private static MutableLiveData<ArrayList<String>> symbolList;
-    public static long searchNetworkCallCount;
 
     public StockRepository(Context mContext) {
         this.mContext = mContext;
@@ -110,8 +109,6 @@ public class StockRepository {
 
     public MutableLiveData<ArrayList<StockSymbol>> getSymbolsForName(String companyName) {
         MutableLiveData<ArrayList<StockSymbol>> symbolSearchResponse = new MutableLiveData<>();
-
-        Log.i(TAG, "Search network call count : " + ++searchNetworkCallCount);
 
         ApiClient.getSymbolSearchApiInterface().getSymbolForQuery(SYMBOL_SEARCH_API_URL, companyName)
                 .enqueue(new Callback<SymbolResponse>() {
