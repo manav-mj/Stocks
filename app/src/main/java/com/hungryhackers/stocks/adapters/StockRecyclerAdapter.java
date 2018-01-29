@@ -11,8 +11,6 @@ import com.hungryhackers.stocks.R;
 import com.hungryhackers.stocks.models.Stock;
 import com.hungryhackers.stocks.models.StockViewModel;
 
-import java.util.ArrayList;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -33,7 +31,7 @@ public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdap
     @Override
     public StockViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(mContext)
-                .inflate(R.layout.adapter_card_view, parent, false);
+                .inflate(R.layout.item_stock_list, parent, false);
         return new StockViewHolder(v);
     }
 

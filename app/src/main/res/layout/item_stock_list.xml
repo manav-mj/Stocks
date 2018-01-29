@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/stock_item_height"
+    android:paddingTop="10dp"
+    android:background="@android:color/black"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:gravity="start"
+        android:id="@+id/company_symbol"
+        style="@style/StockItemTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:text="Symbol"
+        android:textAllCaps="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/company_bid"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/company_bid"
+        style="@style/StockItemTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/company_symbol"
+        android:layout_marginEnd="10dp"
+        android:text="bid"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/change_layout"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/change_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@drawable/stock_item_change_bg"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/change_sign"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:paddingLeft="-15dp"
+            android:paddingRight="-12dp"
+            android:src="@drawable/ic_add_white_48dp" />
+
+        <TextView
+            android:id="@+id/company_change"
+            style="@style/StockItemTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.00" />
+        <TextView
+            android:id="@+id/company_change_percentage_symbol"
+            style="@style/StockItemTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="%" />
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

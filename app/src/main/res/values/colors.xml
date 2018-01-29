@@ -3,8 +3,8 @@
     <color name="colorPrimary">#141414</color>
     <color name="colorPrimaryDark">#141414</color>
     <color name="colorAccent">#2fa1d5</color>
-    <color name="green">#4cda64</color>
-    <color name="red">#ff3a2f</color>
+    <color name="green">#47cc5e</color>
+    <color name="red">#ff3b2f</color>
     <color name="search_view_bg_color">#262626</color>
     <color name="light_grey_text">#8e8e8e</color>
 </resources>

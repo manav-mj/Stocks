@@ -2,9 +2,11 @@ package com.hungryhackers.stocks.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ import com.hungryhackers.stocks.R;
 import com.hungryhackers.stocks.adapters.StockRecyclerAdapter;
 import com.hungryhackers.stocks.models.StockViewModel;
 import com.hungryhackers.stocks.network.StockRepository;
+import com.hungryhackers.stocks.utils.CustomItemDecoration;
 import com.hungryhackers.stocks.utils.StockUtils;
 
 import butterknife.BindView;
@@ -77,6 +80,7 @@ public class StockListFragment extends Fragment {
         stockRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         stockAdapter = new StockRecyclerAdapter(getContext(), stockViewModel);
         stockRecyclerView.setAdapter(stockAdapter);
+        stockRecyclerView.addItemDecoration(new CustomItemDecoration(getContext(), DividerItemDecoration.VERTICAL, Color.GRAY));
 
 //        stockRecyclerView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 //            @Override
