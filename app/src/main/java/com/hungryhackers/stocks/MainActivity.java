@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
     ConstraintSet initialSet, finalSet;
 
     private Boolean alreadyRevealed = false;
-    private Boolean firstCharacterType = true;
 
     StockListFragment stockFragment;
     SearchFragment searchFragment;
@@ -105,25 +104,16 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
         searchTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-
+                if (charSequence.toString().isEmpty()){
+                    showProgress(true);
+                    showClearButton(true);
+                }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
 
                 searchHandler.removeCallbacks(searchTimer);
-
-                if (!charSequence.toString().isEmpty()) {
-                    if (firstCharacterType) {
-                        showClearButton(true);
-                        showProgress(true);
-                        firstCharacterType = false;
-                    }
-                } else {
-                    showClearButton(false);
-                    showProgress(false);
-                    firstCharacterType = true;
-                }
             }
 
             @Override
@@ -135,7 +125,11 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.On
 
                     lastTextEditTime = System.currentTimeMillis();
                     searchHandler.postDelayed(searchTimer, SEARCH_DELAY);
-                } else searchFragment.search(editable.toString());
+                } else {
+                    searchFragment.search(editable.toString());
+                    showClearButton(false);
+                    showProgress(false);
+                }
             }
         };
 
