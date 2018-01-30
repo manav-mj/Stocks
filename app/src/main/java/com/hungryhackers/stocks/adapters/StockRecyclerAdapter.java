@@ -5,6 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.hungryhackers.stocks.R;
@@ -40,6 +43,18 @@ public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdap
         Stock stock = stockViewModel.getStockList().getValue().get(position);
         holder.bidTextView.setText(stock.price);
         holder.symbolTextView.setText(stock.symbol);
+        if (stock.price == null){
+            holder.changeLayout.setBackground(null);
+            holder.changeTextView.setVisibility(View.GONE);
+            holder.changeSign.setImageResource(R.drawable.ic_remove_white_48dp);
+            holder.percentTextView.setVisibility(View.GONE);
+
+        }else {
+            holder.changeLayout.setBackgroundResource(R.drawable.stock_item_change_bg);
+            holder.changeTextView.setVisibility(View.VISIBLE);
+            holder.changeSign.setImageResource(R.drawable.ic_add_white_48dp);
+            holder.percentTextView.setVisibility(View.VISIBLE);
+        }
 //        holder.changeTextView.setText(stock.change);
 //        if (stock.change.charAt(0) == '+'){
 //            holder.changeTextView.setTextColor(Color.rgb(00,153,00));
@@ -62,6 +77,12 @@ public class StockRecyclerAdapter extends RecyclerView.Adapter<StockRecyclerAdap
         TextView bidTextView;
         @BindView(R.id.company_change)
         TextView changeTextView;
+        @BindView(R.id.change_layout)
+        LinearLayout changeLayout;
+        @BindView(R.id.change_sign)
+        ImageView changeSign;
+        @BindView(R.id.company_change_percentage_symbol)
+        TextView percentTextView;
 
         public StockViewHolder(View itemView) {
             super(itemView);

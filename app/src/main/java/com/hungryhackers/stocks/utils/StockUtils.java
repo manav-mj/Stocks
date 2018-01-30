@@ -1,6 +1,7 @@
 package com.hungryhackers.stocks.utils;
 
 import com.hungryhackers.stocks.MainActivity;
+import com.hungryhackers.stocks.models.Stock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,5 +26,16 @@ public class StockUtils {
 
     public static ArrayList<String> convertToArrayList(String string, String delimiter){
         return new ArrayList<>(Arrays.asList(string.split(delimiter)));
+    }
+
+    public static boolean isStockPresentIn(ArrayList<Stock> stocks, String symbol){
+        ArrayList<String> symbolList = new ArrayList<>();
+
+        for (Stock s :
+                stocks) {
+            symbolList.add(s.symbol);
+        }
+
+        return symbolList.contains(symbol);
     }
 }
