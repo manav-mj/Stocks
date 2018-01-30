@@ -97,11 +97,7 @@ public class StockRepository {
             String stockSymbols = mContext.getSharedPreferences("STOCKS", MODE_PRIVATE)
                     .getString(SP_STOCK_SYMBOL_KEY, null);
 
-            if (stockSymbols == null) {
-                getSymbolList(true);
-            } else {
-                symbolList.setValue(new ArrayList<>(Arrays.asList(stockSymbols.split(STOCK_DELIMITER_FOR_SP))));
-            }
+            symbolList.setValue(new ArrayList<>(Arrays.asList(stockSymbols.split(STOCK_DELIMITER_FOR_SP))));
         }
 
         return symbolList;

@@ -14,6 +14,7 @@ import com.hungryhackers.stocks.models.SearchViewModel;
 import com.hungryhackers.stocks.models.StockSymbol;
 import com.hungryhackers.stocks.models.StockViewModel;
 import com.hungryhackers.stocks.network.StockRepository;
+import com.hungryhackers.stocks.utils.StockUtils;
 
 import java.util.ArrayList;
 
@@ -96,7 +97,8 @@ public class SearchFragment extends Fragment {
 
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             String symbol = symbols.get(i).getSymbol();
-            stockViewModel.addStockWithSymbol(symbol);
+            if (!stockViewModel.getSymbolList().getValue().contains(symbol))
+                stockViewModel.addStockWithSymbol(symbol);
             listView.setAdapter(null);
             mListener.onItemClicked();
         });
@@ -105,6 +107,7 @@ public class SearchFragment extends Fragment {
     public interface OnSearchFragmentListener {
         // TODO: Update argument type and name
         void onItemClicked();
+
         void onSearchCompleted();
     }
 }
